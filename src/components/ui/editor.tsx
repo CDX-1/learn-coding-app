@@ -8,7 +8,10 @@ import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 const TAB_SPACES = "    ";
 const NON_WHITESPACE_REGEX = /\S/;
-const jetbrainsMono = JetBrains_Mono({ weight: "300" });
+const jetbrainsMono = JetBrains_Mono({
+    weight: "300",
+    subsets: ['latin']
+});
 
 const AUTO_CLOSE_PAIRS: Record<string, string> = {
     "(": ")",
