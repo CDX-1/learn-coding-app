@@ -1,103 +1,151 @@
-import Image from "next/image";
+"use client";
+
+import { useState, useEffect, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import Editor, { EditorRef } from "@/components/ui/editor";
+import { HoverCard, HoverCardContent } from "@/components/ui/hover-card";
+import Output, { OutputRef } from "@/components/ui/output";
+import { HoverCardTrigger } from "@radix-ui/react-hover-card";
+import { ArrowRight, Book, HelpCircle, PlayIcon, TriangleAlert } from "lucide-react";
+import Correct from "@/components/ui/correct";
+import InlineCode from "@/components/inline-code";
+import CodeBlock from "@/components/code-block";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+	const editorRef = useRef<EditorRef>(null);
+	const outputRef = useRef<OutputRef>(null);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+	const [isCorrect, setCorrect] = useState(false);
+	const [isComplete, setComplete] = useState(false);
+	const [isMobile, setIsMobile] = useState(false);
+	const [isQuizMode, setQuizMode] = useState(false);
+
+	const run = () => {
+		if (editorRef.current == null) return;
+		editorRef.current.run();
+		setTimeout(() => check(), 1);
+	};
+
+	const validator = (code: string, output: any[], num: number) => code.includes("10") && code.includes("5") && code.includes("=") && code.includes("+") && output.includes(num);
+
+	const check = () => {
+		if (editorRef.current == null) return;
+		if (outputRef.current == null) return;
+
+		const code = editorRef.current.getCode();
+		const output = outputRef.current.getOutput();
+
+		setCorrect(validator(code, output, 15));
+	};
+
+	const takeQuiz = () => {
+		setQuizMode(true);
+	};
+
+	const complete = () => {
+		setComplete(true);
+	};
+
+	useEffect(() => {
+		const handleResize = () => {
+			setIsMobile(window.innerWidth < 768);
+		};
+
+		window.addEventListener("resize", handleResize);
+		handleResize();
+
+		return () => window.removeEventListener("resize", handleResize);
+	}, []);
+
+	return (
+		<div className="flex items-center justify-center w-full h-screen">
+			{isMobile ? (
+				<div className="flex flex-col items-center">
+					<TriangleAlert className="scale-150" />
+					<p className="pt-4 pb-2 text-center">Window Size is Unsupported</p>
+					<p className="w-3/4 text-center">
+						Do note that this is a demo and is not intended
+						to support varying window sizes.
+					</p>
+				</div>
+			) : !isComplete ? (
+				<div className="flex items-center justify-center w-full h-screen">
+					{isQuizMode ? (
+						<Card className="w-2/5">
+							<CardHeader>
+								<CardTitle>Write a program that uses two variables to calculate the sum of 5 and 10</CardTitle>
+								<CardDescription>Ensure you actually performs the mathematical operations in the code.</CardDescription>
+							</CardHeader>
+							<CardContent>
+								<div className="flex-col space-y-4">
+									<div className="space-y-2">
+										<h3 className="font-mono">Editor</h3>
+										<Editor ref={editorRef} />
+									</div>
+									<div className="space-y-2">
+										<h3 className="font-mono">Output</h3>
+										<Output ref={outputRef} />
+									</div>
+								</div>
+							</CardContent>
+							<CardFooter>
+								<div className="flex justify-between w-full">
+									<div className="flex space-x-4">
+										<Button onClick={() => run()} variant="outline"><PlayIcon />Run</Button>
+										{isCorrect && <Button onClick={() => complete()}><ArrowRight />Continue</Button>}
+									</div>
+									<Button variant="link"><HelpCircle />
+										<HoverCard>
+											<HoverCardTrigger asChild>
+												<p className="hidden lg:block">Need help?</p>
+											</HoverCardTrigger>
+											<HoverCardContent className="w-1/2">
+												<div className="flex-col space-y-2">
+													<div className="flex space-x-1"><Book className="py-1" /><p><b>Help</b></p></div>
+													<p>
+														In JavaScript, you can add numbers by using <code>+</code> operator.
+													</p>
+													<CodeBlock text={`let a = 7\nlet b = 8\nlet c = a + b`} />
+												</div>
+											</HoverCardContent>
+										</HoverCard>
+									</Button>
+								</div>
+							</CardFooter>
+						</Card>
+					) : (
+						<Card className="w-2/5">
+							<CardHeader>
+								<CardTitle>Variables</CardTitle>
+								<CardDescription>Storing values</CardDescription>
+							</CardHeader>
+							<CardContent>
+								<p className="pb-2">
+									In programming, variables are a way to store values with an identifier.
+								</p>
+								<InlineCode text="let a = 4" className="py-2" />
+								<p className="py-2">
+									You can also assign variables to numeric values such and perform mathematical
+									operations with those values to model equations.
+								</p>
+								<CodeBlock text={`let a = 20\nlet b = 5\nlet c = a / b // Quotient of 20 and 5, 4`} className="py-2" />
+								<p className="py-2">
+									You can then output the values of these variables to the console.
+								</p>
+								<CodeBlock text={`let a = 7\nlet b = 3\nlet c = a * b\nconsole.log(c)`} className="py-2" />
+								<p className="py-2">
+									This would output
+								</p>
+								<InlineCode text="21" className="py-2" />
+							</CardContent>
+							<CardFooter>
+								<Button onClick={() => takeQuiz()}><ArrowRight />Take Quiz</Button>
+							</CardFooter>
+						</Card>
+					)}
+				</div>
+			) : <Correct />}
+		</div>
+	);
 }
