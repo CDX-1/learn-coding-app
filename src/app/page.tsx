@@ -126,10 +126,10 @@ export default function Home() {
 								</p>
 								<InlineCode text="let a = 4" className="py-2" />
 								<p className="py-2">
-									You can also assign variables to numeric values such and perform mathematical
-									operations with those values to model equations.
+									You can perform mathematical operations on variables that are assigned to
+									numeric values and model equations.
 								</p>
-								<CodeBlock text={`let a = 20\nlet b = 5\nlet c = a / b // Quotient of 20 and 5, 4`} className="py-2" />
+								<CodeBlock text={`let a = 20\nlet b = 5\nlet c = a / b // Quotient of 20 and 5 is 4`} className="py-2" />
 								<p className="py-2">
 									You can then output the values of these variables to the console.
 								</p>
